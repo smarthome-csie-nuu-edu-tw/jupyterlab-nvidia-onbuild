@@ -92,6 +92,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 ADD fix-permissions /usr/local/bin/fix-permissions
+RUN chmod 777 /usr/local/bin/fix-permissions
 # Create jovyan user with UID=1000 and in the 'users' group
 # and make sure these dirs are writable by the `users` group.
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
