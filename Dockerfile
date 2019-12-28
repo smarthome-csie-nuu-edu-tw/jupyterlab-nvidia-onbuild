@@ -265,6 +265,23 @@ RUN conda install -c conda-forge ipympl && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install jupyter-matplotlib
 
+# jupyter labextension (Material Darker JupyterLab Extension) ####
+# https://github.com/oriolmirosa/jupyterlab_materialdarker
+# This is my port of the Material Darker theme for JupyterLab
+# 
+##################################################################
+RUN jupyter labextension install @oriolmirosa/jupyterlab_materialdarker
+
+# jupyter labextension (jupyterlab_email) ##########################
+# https://github.com/timkpaine/jupyterlab_email
+# A jupyterlab extension to email notebooks from the browser
+# 仍需要設定Email設定
+#
+####################################################################
+RUN pip install jupyterlab_email && \
+    jupyter labextension install jupyterlab_email && \
+    jupyter serverextension enable --py jupyterlab_email
+
 # Install Jupyer Hub 相關支援插件-重要核心
 #RUN jupyter labextension install \
     ## jupyterlab_sandbox 參考來源:https://github.com/canavandl/jupyterlab_sandbox (暫時不支援)
@@ -280,7 +297,6 @@ RUN jupyter labextension install \
 RUN jupyter labextension install \
     #@kenshohara/theme-nord-extension
     #@rahlir/theme-gruvbox \
-    @oriolmirosa/jupyterlab_materialdarker \
     # jupyterlab_html 參考來源:https://github.com/mflevine/jupyterlab_html
     @mflevine/jupyterlab_html
 
