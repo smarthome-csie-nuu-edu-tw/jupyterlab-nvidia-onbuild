@@ -282,6 +282,15 @@ RUN pip install jupyterlab_email && \
     jupyter labextension install jupyterlab_email && \
     jupyter serverextension enable --py jupyterlab_email
 
+# jupyter labextension (jupyterlab_autoversion) ################
+# https://github.com/timkpaine/jupyterlab_autoversion
+# Automatically version jupyter notebooks in JupyterLab
+# 
+################################################################
+RUN pip install jupyterlab_autoversion && \
+    jupyter labextension install jupyterlab_autoversion && \
+    jupyter serverextension enable --py jupyterlab_autoversion
+
 # Install Jupyer Hub 相關支援插件-重要核心
 #RUN jupyter labextension install \
     ## jupyterlab_sandbox 參考來源:https://github.com/canavandl/jupyterlab_sandbox (暫時不支援)
