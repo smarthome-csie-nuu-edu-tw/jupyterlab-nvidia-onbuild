@@ -155,10 +155,6 @@ RUN conda clean -tipsy && \
 # 清除conda快取
 RUN conda build purge-all
 
-# Install conda bioconda通道套件
-RUN conda install --quiet --yes -c bioconda \ 
-    cnv_facets
-
 # Install conda creditx通道套件
 #RUN conda install -c creditx nbresuse
 
@@ -172,6 +168,7 @@ RUN pip install nbresuse && \
 # jupyter labextension (jupyterlab_iframe) ######################
 # Open a site in a widget, or add a set of "quicklinks".
 # https://github.com/timkpaine/jupyterlab_iframe/
+#
 #################################################################
 RUN pip install jupyterlab_iframe && \
     jupyter labextension install jupyterlab_iframe && \
@@ -180,6 +177,7 @@ RUN pip install jupyterlab_iframe && \
 # jupyter labextension (JupyterLab Top Bar) ####################################################################
 # Similar to the status bar, the top bar can be used to place a few indicators and optimize the overall space.
 # https://github.com/jtpio/jupyterlab-topbar
+# 
 ################################################################################################################
 RUN jupyter labextension install jupyterlab-topbar-extension \
     jupyterlab-system-monitor \
@@ -190,6 +188,7 @@ RUN jupyter labextension install jupyterlab-topbar-extension \
 # jupyter labextension (jupyterlab-git) ####################
 # A JupyterLab extension for version control using git
 # https://github.com/jupyterlab/jupyterlab-git
+# 
 ############################################################
 RUN pip install --upgrade jupyterlab-git && \
     jupyter lab build
@@ -290,11 +289,6 @@ RUN pip install jupyterlab_email && \
 RUN pip install jupyterlab_autoversion && \
     jupyter labextension install jupyterlab_autoversion && \
     jupyter serverextension enable --py jupyterlab_autoversion
-
-# Install Jupyer Hub 相關支援插件-重要核心
-#RUN jupyter labextension install \
-    ## jupyterlab_sandbox 參考來源:https://github.com/canavandl/jupyterlab_sandbox (暫時不支援)
-    #jupyterlab_sandbox
 
 # Install Jupyer Hub 相關支援插件-@jupyterlab
 RUN jupyter labextension install \
