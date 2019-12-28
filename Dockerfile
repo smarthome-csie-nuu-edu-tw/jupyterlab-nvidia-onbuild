@@ -290,22 +290,43 @@ RUN pip install jupyterlab_autoversion && \
     jupyter labextension install jupyterlab_autoversion && \
     jupyter serverextension enable --py jupyterlab_autoversion
 
-# Install Jupyer Hub 相關支援插件-@jupyterlab
-RUN jupyter labextension install \
-    @jupyterlab/github \
-    #@jupyterlab/google-drive \ #因為學校網域因此必須放棄
-    @jupyterlab/celltags
+# jupyter labextension (jupyterlab-celltags) ###########################################################
+# https://github.com/jupyterlab/jupyterlab-celltags
+# Note: A new version of celltags is currently being developed to be merged into core JupyterLab
+# 未來可能有其他版本，可升級替換
+# 
+########################################################################################################
+RUN jupyter labextension install @jupyterlab/celltags
 
-# Install Jupyer Hub 相關支援插件-Theme
-RUN jupyter labextension install \
-    #@kenshohara/theme-nord-extension
-    #@rahlir/theme-gruvbox \
-    # jupyterlab_html 參考來源:https://github.com/mflevine/jupyterlab_html
-    @mflevine/jupyterlab_html
+# jupyter labextension (JupyterLab GitHub) ##############################
+# https://github.com/jupyterlab/jupyterlab-github
+# A JupyterLab extension for accessing GitHub repositories.
+# 
+##########################################################################
+RUN jupyter labextension install @jupyterlab/github
+
+# jupyter labextension (jupyterlab_html) ################################
+# https://github.com/mflevine/jupyterlab_html
+# JupyterLab extension mimerenderer to render HTML files in IFrame Tab
+#
+##########################################################################
+RUN jupyter labextension install @mflevine/jupyterlab_html
+
+# jupyter labextension (Go to definition extension for JupyterLab)
+# https://github.com/krassowski/jupyterlab-go-to-definition
+# Jump to definition of a variable or function in JupyterLab notebook and file editor.
+#
+########################################################################################
+RUN jupyter labextension install @krassowski/jupyterlab_go_to_definition
+
+# jupyter labextension (Jupyter Widgets JupyterLab Extension)
+# https://github.com/jupyter-widgets/ipywidgets/tree/master/packages/jupyterlab-manager
+# A JupyterLab extension for Jupyter/IPython widgets.
+# 
+###########################################################################################
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 # Install Jupyer Hub 相關支援插件-其他    
 RUN jupyter labextension install \
     @krassowski/jupyterlab_go_to_definition
     #@lckr/jupyterlab_variableinspector
-
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
