@@ -127,7 +127,7 @@ RUN conda install --quiet --yes \
     # 通道順序設定(按照重要性排序)
     -c anaconda -c conda-forge -c r -c pytorch -c menpo \
     # 套件清單(按照字母排序)
-    beautifulsoup4 bokeh \
+    beautifulsoup4 \
     conda-build cython cloudpickle contextlib2 \
     h5py hdf5 \
     ipywidgets \
@@ -254,6 +254,16 @@ RUN jupyter labextension install @jupyterlab/toc
 RUN pip install pynvml && \
     conda install bokeh && \
     jupyter labextension install jupyterlab-nvdashboard
+
+# jupyter labextension (jupyter-matplotlib) ############################################
+# https://github.com/matplotlib/jupyter-matplotlib
+# jupyter-matplotlib enables the interactive features of matplotlib in the Jupyterlab
+#
+########################################################################################
+RUN conda install -c conda-forge ipympl && \
+    conda install nodejs && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install jupyter-matplotlib
 
 # Install Jupyer Hub 相關支援插件-重要核心
 #RUN jupyter labextension install \
