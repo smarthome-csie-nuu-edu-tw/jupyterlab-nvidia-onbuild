@@ -359,6 +359,5 @@ RUN npm install -g ijavascript && \
     ijsinstall
 
 # Install Jupyer Hub 相關支援插件-其他    
-RUN jupyter labextension install \
-    @krassowski/jupyterlab_go_to_definition
+#RUN jupyter labextension install \
     #@lckr/jupyterlab_variableinspector
