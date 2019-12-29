@@ -327,6 +327,37 @@ RUN jupyter labextension install @krassowski/jupyterlab_go_to_definition
 ###########################################################################################
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
+# Jupyter kernel (IJava) 
+# https://github.com/SpencerPark/IJava
+# A Jupyter kernel for executing Java code
+#
+######################################################
+RUN cd /tmp && \
+    git clone https://github.com/SpencerPark/IJava.git && \
+    cd IJava && \
+    chmod u+x gradlew && ./gradlew installKernel
+
+# Jupyter kernel (Jupyter-PHP-Installer)
+# 
+###########################################
+RUN cd /tmp && \
+    ## Download Composer
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+    # 下載檔案驗證機制
+    #php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verifie$
+    php composer-setup.php && \
+    php -r "unlink('composer-setup.php');" && \
+    ## jupyter-php-installer
+    wget https://litipk.github.io/Jupyter-PHP-Installer/dist/jupyter-php-installer.phar && \
+    chmod +x ./jupyter-php-installer.phar && \
+    ./jupyter-php-installer.phar install
+
+# Jupyter kernel (nodejs)
+#
+###############################
+RUN npm install -g ijavascript && \
+    ijsinstall
+
 # Install Jupyer Hub 相關支援插件-其他    
 RUN jupyter labextension install \
     @krassowski/jupyterlab_go_to_definition
