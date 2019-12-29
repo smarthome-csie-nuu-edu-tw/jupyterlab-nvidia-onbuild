@@ -142,8 +142,7 @@ RUN conda install --quiet --yes \
     r-essentials \
     scikit-learn scikit-image sympy seaborn scipy statsmodels sqlalchemy \
     torchvision tini \
-    vincent \
-    xlrd xeus-cling
+    vincent
 
 # 清除快取套件
 RUN conda clean -tipsy && \
@@ -357,6 +356,14 @@ RUN cd /tmp && \
 ###############################
 RUN npm install -g ijavascript && \
     ijsinstall
+
+# Jupyter kernel (xeus-cling)
+# https://github.com/jupyter-xeus/xeus-cling
+# Jupyter kernel for C++ based on the C++ interpreter cling 
+# and the native implementation of the Jupyter protocol xeus
+#
+##############################################################
+RUN conda install xeus-cling -c conda-forge
 
 # Install Jupyer Hub 相關支援插件-其他    
 #RUN jupyter labextension install \
