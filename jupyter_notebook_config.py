@@ -42,7 +42,9 @@ if 'GEN_CERT' in os.environ:
     os.chmod(pem_file, stat.S_IRUSR | stat.S_IWUSR)
     c.NotebookApp.certfile = pem_file
 
-c.InlineBackend.figure_formats = {'png', 'retina'}
+# 預測在在notebook中顯示matplot圖片
+c.IPKernelApp.matplotlib = 'inline'
+c.InlineBackend.figure_formats = {'svg', 'png', 'retina'}
 
 c.JupyterLabIFrame.iframes = ['https://mlc.app', 'https://406.csie.nuu.edu.tw', 'https://iothome.csie.nuu.edu.tw']
 c.JupyterLabIFrame.welcome = 'https://ai.csie.nuu.edu.tw/hub/home'
