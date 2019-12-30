@@ -1,88 +1,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-FROM nvidia/cuda:10.0-cudnn7-devel
+FROM ziyibear/jupyterlab-nvidia-onbuild:2080ti
 LABEL maintainer="ZiYi <osirisgekkou@gmail.com>"
 USER root
-
-# Install all OS dependencies for notebook server that starts but lacks all
-# features (e.g., download as all possible file formats)
-ENV DEBIAN_FRONTEND noninteractive
-# Tensorflow Allowing GPU memory growth
-ENV TF_FORCE_GPU_ALLOW_GROWTH true
-
-# darknetpy環境設定
-ENV GPU 1
-ENV CUDNN 1
-ENV OPENCV 1
-ENV OPENMP 1
-
-#fix problems
-#RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
-
-RUN apt-get update && apt-get -yq dist-upgrade \
-    && apt-get install -yq --no-install-recommends \
-    apt-utils autoconf automake \
-    bzip2 build-essential \
-    ca-certificates cmake clang \
-    default-jre \
-    emacs \
-    fonts-liberation ffmpeg \
-    git graphviz \
-    php7.2 php7.2-dev php-zmq \
-    inkscape \
-    jed \
-    libsm6 libxext-dev libxrender1 lmodern locales \
-    libreadline-dev libopencv-dev libzmq3-dev libtool \
-    libssl-dev libglu1-mesa-dev \
-    make mesa-common-dev \
-    nano \
-    openssh-client \
-    pandoc python-dev python-pydot python-pydot-ng pkg-config pv protobuf-compiler python-pil python-lxml python-tk \
-    rename \
-    sudo \
-    texlive-fonts-extra texlive-fonts-recommended texlive-generic-recommended texlive-latex-base texlive-latex-extra texlive-xetex \
-    unrar unzip \
-    vim \
-    wget \
-    zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && \
-    apt-get install -yq --no-install-recommends fonts-moe-standard-song fonts-moe-standard-kai fonts-cns11643-sung fonts-cns11643-kai fonts-arphic-ukai \
-    fonts-arphic-uming fonts-arphic-bkai00mp fonts-arphic-bsmi00lp fonts-arphic-gbsn00lp fonts-arphic-gkai00mp fonts-cwtex-ming fonts-cwtex-kai fonts-cwtex-heib \
-    fonts-cwtex-yen fonts-cwtex-fs fonts-cwtex-docs fonts-wqy-microhei fonts-wqy-zenhei xfonts-wqy fonts-hanazono && \
-    apt-get install -yq --no-install-recommends language-pack-zh* && \
-    apt-get install -yq --no-install-recommends chinese* && \
-    apt-get install -yq --no-install-recommends fonts-arphic-ukai fonts-arphic-uming fonts-ipafont-mincho fonts-ipafont-gothic fonts-unfonts-core \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen
-
-# Configure environment
-ENV CONDA_DIR=/opt/conda \
-    SHELL=/bin/bash \
-    NB_USER=jovyan \
-    NB_UID=1000 \
-    NB_GID=100 \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
-ENV PATH=$CONDA_DIR/bin:$PATH \
-    HOME=/home/$NB_USER
-
-ADD fix-permissions /usr/local/bin/fix-permissions
-# Create jovyan user with UID=1000 and in the 'users' group
-# and make sure these dirs are writable by the `users` group.
-RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
-    mkdir -p $CONDA_DIR && \
-    chown $NB_USER:$NB_GID $CONDA_DIR && \
-    chmod g+w /etc/passwd /etc/group && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
 
 # Install Matlab
 COPY R2018b_glnxa64 /R2018b_glnxa64
@@ -98,167 +19,12 @@ RUN cd /R2018b_glnxa64 && \
 RUN mkdir /home/$NB_USER/work && \
     fix-permissions /home/$NB_USER
 
-# Install conda as jovyan and check the md5 sum provided on the download site
-# 限制:OSError: MATLAB Engine for Python supports Python version 2.7, 3.5 and 3.6
-ENV MINICONDA_VERSION 4.3.31
-ENV MINICONDA_CHECKSUM 7fe70b214bee1143e3e3f0467b71453c
-#ENV MINICONDA_VERSION latest
-#ENV MINICONDA_CHECKSUM 718259965f234088d785cad1fbd7de03
-RUN cd /tmp && \
-    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
-    echo "${MINICONDA_CHECKSUM} *Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh" | md5sum -c - && \
-    /bin/bash Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
-    rm Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
-    $CONDA_DIR/bin/conda config --system --prepend channels conda-forge && \
-    $CONDA_DIR/bin/conda config --system --set auto_update_conda false && \
-    $CONDA_DIR/bin/conda config --system --set show_channel_urls true && \
-    $CONDA_DIR/bin/conda update --all --quiet --yes && \
-#WARNING: 'conda clean --source-cache' is deprecated.
-# Use 'conda build purge-all' to remove source cache files.
-    #conda build purge-all && \
-    conda clean -tipsy && \
-    rm -rf /home/$NB_USER/.cache/yarn && \
-    fix-permissions $CONDA_DIR && \
-    fix-permissions /home/$NB_USER 
- 
-# 安裝 Jupyter Notebook 、 Hub 以及其他相關必要套件 
-RUN conda install --quiet --yes \
-    # 通道順序設定(按照重要性排序)
-    -c anaconda -c conda-forge -c pytorch \
-    # 套件清單(按照字母排序)
-    beautifulsoup4 bokeh black \
-    conda-build cython cloudpickle contextlib2 \
-    h5py hdf5 \
-    ipywidgets \
-    jupyterlab_code_formatter jupyternotify jupyter_contrib_nbextensions jupyter_nbextensions_configurator jupyterlab-git \
-    gsl \
-    jupyterhub \
-    keras-gpu \
-    libgcc libstdcxx-ng lxml \
-    mesa-libegl-cos6-x86_64 matplotlib matplotlib-base \
-    #'notebook=5.*' \
-    notebook nomkl numexpr numpy numba \
-    #'jupyterhub=0.8.*' \
-    pytorch-nightly pandas patsy protobuf pyspark pillow \
-    scikit-learn scikit-image sympy seaborn scipy statsmodels sqlalchemy \
-    torchvision tini tensorflow-tensorboard tensorflow-gpu \
-    vincent \
-    xlrd xeus-cling \
-    && \
-    #'jupyterlab=0.*' \
-    conda install --quiet --yes -c conda-forge jupyterlab \ 
-    # 清除快取套件
-    && conda clean -tipsy && \
-    npm cache clean --force && \
-    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
-    rm -rf /home/$NB_USER/.cache/yarn && \
-    fix-permissions $CONDA_DIR && \
-    fix-permissions /home/$NB_USER
-
-# Conda尚未安裝套件(可能衝突或是其他原因而拋棄套件)
-# dlib
-
 # 清除conda快取
 RUN conda build purge-all
  
 # 添加 Matlab python API (need Root權限和conda安裝)
 RUN cd /usr/local/MATLAB/R2018b/extern/engines/python && \
     python setup.py install
-
-# Install conda menpo通道套件
-RUN conda install --quiet --yes -c menpo \
-    opencv3 
-
-# Install conda bioconda通道套件
-RUN conda install --quiet --yes -c bioconda \ 
-    cnv_facets
-
-# Install conda r通道套件
-RUN conda install -c r \
-    r-essentials
-
-# Install conda creditx通道套件
-#RUN conda install -c creditx nbresuse
-
-RUN conda update --all
-
-# Install Jupyer Hub 相關支援插件 Dependencies
-    ## JupyterLab Status Bar
-RUN pip install nbresuse && \
-    jupyter serverextension enable --py nbresuse
-
-# Install jupyterlab_iframe 相關支援插件 參考來源:https://github.com/timkpaine/jupyterlab_iframe/
-RUN pip install jupyterlab_iframe && \
-    jupyter labextension install jupyterlab_iframe
-
-# Install Jupyer Hub 相關支援插件-重要核心
-RUN jupyter labextension install \
-    ## jupyterlab_tensorboard 參考來源:https://github.com/chaoleili/jupyterlab_tensorboard 
-    jupyterlab_tensorboard \
-    ## JupyterLab Top Bar 參考來源:https://github.com/jtpio/jupyterlab-topbar
-    jupyterlab-topbar-extension \
-    jupyterlab-system-monitor \
-    jupyterlab-topbar-text \
-    jupyterlab-logout \
-    #jupyterlab-theme-toggle \ 故障
-    ## jupyterlab-drawio 參考來源:https://github.com/QuantStack/jupyterlab-drawio
-    jupyterlab-drawio \
-    ## jupyterlab-spreadsheet 參考來源:https://github.com/quigleyj97/jupyterlab-spreadsheet
-    jupyterlab-spreadsheet \
-    ## jupyterlab-chart-editor 參考來源:https://github.com/plotly/jupyterlab-chart-editor
-    jupyterlab-chart-editor
-    ## jupyterlab_sandbox 參考來源:https://github.com/canavandl/jupyterlab_sandbox (暫時不支援)
-    #jupyterlab_sandbox
-
-# Install Jupyer Hub 相關支援插件-@jupyterlab
-RUN jupyter labextension install \
-    @jupyterlab/toc \
-    @jupyterlab/github \
-    @jupyterlab/hub-extension \
-    #@jupyterlab/google-drive \ #因為學校網域因此必須放棄
-    @jupyterlab/git \
-    @jupyterlab/celltags
-
-# Install Jupyer Hub 相關支援插件-Theme
-RUN jupyter labextension install \
-    #@kenshohara/theme-nord-extension
-    #@rahlir/theme-gruvbox \
-    @oriolmirosa/jupyterlab_materialdarker \
-    # jupyterlab_html 參考來源:https://github.com/mflevine/jupyterlab_html
-    @mflevine/jupyterlab_html
-
-# Install Jupyer Hub 相關支援插件-其他    
-RUN jupyter labextension install \
-    @ryantam626/jupyterlab_code_formatter \
-    @krassowski/jupyterlab_go_to_definition
-    #@lckr/jupyterlab_variableinspector
-
-# Jupyter Hub 啟動功能
-RUN jupyter serverextension enable --py \
-    jupyterlab_code_formatter \
-    jupyterlab_git \
-    jupyterlab_iframe
-
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
-
-# IJava
-RUN cd /tmp && \
-    git clone https://github.com/SpencerPark/IJava.git && \
-    cd IJava && \
-    chmod u+x gradlew && ./gradlew installKernel
-
-# Jupyter-PHP kernel
-RUN cd /tmp && \
-    ## Download Composer
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-    # 下載檔案驗證機制
-    #php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
-    php composer-setup.php && \
-    php -r "unlink('composer-setup.php');" && \
-    ## jupyter-php-installer
-    wget https://litipk.github.io/Jupyter-PHP-Installer/dist/jupyter-php-installer.phar && \
-    chmod +x ./jupyter-php-installer.phar && \
-    ./jupyter-php-installer.phar install
 
 # Build recommend 對話框修復
 RUN jupyter lab build
@@ -327,14 +93,6 @@ RUN cd ~/torch/install/bin/ && \
     for NAME in dpnn nn optim optnet csvigo cunn fblualib torchx tds; \
     do ./luarocks install $NAME; \
     done
-
-## Rust Programming Language
-COPY rustup-init.sh /tmp
-RUN cd /tmp && \
-    sh rustup-init.sh -y -v
-ENV PATH=$PATH:$HOME/.cargo/bin
-RUN rustup default nightly
-RUN rustc --version
 
 RUN fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
@@ -409,10 +167,6 @@ RUN cd /home/$NB_USER && \
     tar -xvf annotations.tar.gz
 # 系統服務簡易說明書
 COPY 使用注意事項 /home/$NB_USER/
-     
-# nodejs kernel
-RUN npm install -g ijavascript && \
-    ijsinstall
 
 ### Matlab Configure
 # add Matlab Command
@@ -426,16 +180,6 @@ USER root
 # 修正部分錯誤 error while loading shared libraries: libopencv_highgui.so.3.1: cannot open shared object file: No such file or directory
 RUN echo "/opt/conda/pkgs/opencv3-3.1.0-py36_0/lib" > /etc/ld.so.conf.d/opencv.conf && \
     ldconfig
-
-#################### Beta測試專區 ##################
-#RUN apt-get update && apt-get install -yq --no-install-recommends \
-
-# Install conda conda-forge通道套件
-
-# 暫時放棄有BUG
-#RUN pip install -U darknetpy
-
-#################### Beta測試專區 ################## END
 
 EXPOSE 8888
 WORKDIR $HOME
@@ -464,8 +208,6 @@ RUN fix-permissions /home/$NB_USER/.ipython/
 RUN fix-permissions /home/$NB_USER/
 
 #################### gamma測試專區(汪子軼用) ################## (ROOT)
-
-RUN apt-get install -y mercurial python-gi-cairo gir1.2-goocanvas-2.0 python-gi python-pygraphviz
 
 #################### gamma測試專區(汪子軼用) ################## (ROOT)
 
