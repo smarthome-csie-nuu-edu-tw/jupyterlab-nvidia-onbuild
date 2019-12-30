@@ -365,6 +365,13 @@ RUN npm install -g ijavascript && \
 ##############################################################
 RUN conda install xeus-cling -c conda-forge
 
+# install toolchain
+#
+######################################################
+RUN curl https://sh.rustup.rs -sSf | \
+    sh -s -- --default-toolchain nightly -y
+ENV PATH=/root/.cargo/bin:$PATH
+
 # Install Jupyer Hub 相關支援插件-其他    
 #RUN jupyter labextension install \
     #@lckr/jupyterlab_variableinspector
