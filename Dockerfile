@@ -134,7 +134,6 @@ RUN conda install --quiet --yes \
     ipywidgets \
     gsl \
     jupyterhub jupyterlab \
-    keras-gpu \
     libgcc libstdcxx-ng lxml \
     mesa-libegl-cos6-x86_64 matplotlib matplotlib-base \
     notebook nomkl numexpr numpy numba \
